@@ -3,16 +3,16 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
 
-config({
-  path: '.env.local',
-});
+config({ path: '.env.local' });
 
 const runMigrate = async () => {
-  if (!process.env.POSTGRES_URL) {
-    throw new Error('POSTGRES_URL is not defined');
+  // Pick up POSTGRES_URL, or fallback to DATABASE_URL
+  const url = process.env.POSTGRES_URL ?? process.env.DATABASE_URL;
+  if (!url) {
+    throw new Error('Neither POSTGRES_URL nor DATABASE_URL is defined');
   }
 
-  const connection = postgres(process.env.POSTGRES_URL, { max: 1 });
+  const connection = postgres(url, { max: 1 });
   const db = drizzle(connection);
 
   console.log('⏳ Running migrations...');
